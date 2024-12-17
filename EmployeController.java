@@ -1,114 +1,111 @@
-package Model;
-public class Employe {
-	private int id;
-	public int getId() {
-		return id;
-	}
+package controller;
 
 
 
+import java.util.List;
 
-	public void setId(int id) {
-		this.id = id;
-	}
-	public Employe(int id, String nom, String prenom, String email, String telephone, double salaire, Role role,
-			Poste poste) {
-		super();
-		this.id = id;
-		this.nom = nom;
-		this.prenom = prenom;
-		this.email = email;
-		this.telephone = telephone;
-		this.salaire = salaire;
-		this.role = role;
-		this.poste = poste;
-	}
-	private String nom;
-	private String prenom;
-	private String email;
-	private String telephone;
-	private double salaire;
-	private Role role;
-	private Poste poste;
-	
-	public Employe(String nom,String prenom,String email,
-			String telephone,double salaire,Role role,Poste poste) {
-		this.nom=nom;
-		this.prenom=prenom;
-		this.email=email;
-		this.telephone=telephone;
-		this.salaire=salaire;
-		this.role=role;
-		this.poste=poste;
-	}
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
+import DAO.EmployeImpl;
+import Model.Employe;
+import Model.Employe.Poste;
+import Model.Employe.Role;
+
+import Model.EmployeModel;
+import View.EmployeView;
+
+public class EmployeController {
+private EmployeModel model;
+private EmployeView view;
+
+public EmployeController(EmployeModel model,EmployeView view) {
+	this.model=model;
+	this.view=view;
+	this.view.btnAjouter.addActionListener(e->addEmploye());
+	this.view.btnModifier.addActionListener(e->updateEmploye());
+	this.view.btnAfficher.addActionListener(e -> afficherEmploye());
+	this.view.btnSupprimer.addActionListener(e -> supprimerEmploye());
 	
 
+
+}
+private void addEmploye() {
+	String nom=view.getNom();
+	String prenom=view.getPrenom();
+	String email=view.getEmail();
+	String telephone=view.getTelephone();
+	double salaire =view.getSalaire();
+	Poste poste=view.getPoste();
+	Role role=view.getRole();
+	
 	
 
-	public String getNom() {
-		return nom;
-	}
-	public void setNom(String nom) {
-		this.nom=nom;
-	}
+	boolean addEmploye=model.addEmploye(nom, prenom, email, telephone,salaire, role, poste);
+	if(addEmploye) System.out.println("Employe ajoute avec Succes");
+	else System.out.println("Echec d'ajout d'employe !!!!!");
+}
+
+
+private void updateEmploye() {
+	int selectedRow = view.table.getSelectedRow();
+	//int id =view.getId(view.table);
+    int id = (int) view.table.getValueAt(selectedRow, 0);
 	
+	String nom=view.getNom();
+	String prenom=view.getPrenom();
+	String email=view.getEmail();
+	String telephone=view.getTelephone();
+	double salaire =view.getSalaire();
+	Poste poste=view.getPoste();
+	Role role=view.getRole();
 	
-	public String getPrenom() {
-		return prenom;
-	}
+	  Employe employe = new Employe(nom, prenom, email, telephone, salaire, role, poste);
+	    EmployeImpl employeImpl = new EmployeImpl();
 
-	public String getEmail() {
-		return email;
-	}
-
-	public String getTelephone() {
-		return telephone;
-	}
-
-	public double getSalaire() {
-		return salaire;
-	}
-
-	public Role getRole() {
-		return role;
-	}
-
-	public Poste getPoste() {
-		return poste;
-	}
-
-	public void setPrenom(String prenom) {
-		this.prenom = prenom;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public void setTelephone(String telephone) {
-		this.telephone = telephone;
-	}
-
-	public void setSalaire(double salaire) {
-		this.salaire = salaire;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
-	public void setPoste(Poste poste) {
-		this.poste = poste;
-	}
-
-   public enum Role {
-		ADMIN,
-		EMPLOYE
-		}
-	public enum Poste {
-		INGENIEURE,
-		TEAM_LEADER,
-		PILOTE
-		}
+	    employeImpl.update(employe,id);
+	   // JOptionPane.showMessageDialog(null, "Employé modifié avec succès !");
+	     
 	
+
+	  
+	}
+public void afficherEmploye() {
+ EmployeImpl employeImpl = new EmployeImpl();
+	    List<Employe> employes = employeImpl.findAll();
+
+	   DefaultTableModel model = (DefaultTableModel) view.table.getModel();
+	    model.setRowCount(0);
+
+	    for (Employe employe : employes) {
+	        model.addRow(new Object[]{
+	        	employe.getId(),
+	            employe.getNom(),
+	            employe.getPrenom(),
+	            employe.getEmail(),
+	            employe.getTelephone(),
+	            employe.getSalaire(),
+	            employe.getRole(),
+	            employe.getPoste()
+	        });
+	    }
+	}
+public void supprimerEmploye() {
+int selectedRow = view.table.getSelectedRow();
+    if (selectedRow == -1) {
+    
+        JOptionPane.showMessageDialog(null, "Veuillez sélectionner un employé à supprimer !");
+   
+    }
+    int id =view.getId(view.table);
+    //int id = (int) view.table.getValueAt(selectedRow, 0);
+    EmployeImpl employeImpl = new EmployeImpl();
+
+    int confirmation = JOptionPane.showConfirmDialog(null, "Voulez-vous vraiment supprimer cet employé ?", "Confirmation", JOptionPane.YES_NO_OPTION);
+    if (confirmation == JOptionPane.YES_OPTION) {
+        employeImpl.delete(id);
+        //JOptionPane.showMessageDialog(null, "Employé supprimé avec succès !");
+      
+    }
+}  
 }
